@@ -60,7 +60,8 @@ public partial class VentaBoletosPage : ContentPage
         // 2. Llenamos los datos en la tarjeta
         lblEquipos.Text = $"{_eventoSeleccionado.EquipoLocal} vs {_eventoSeleccionado.EquipoVisitante}";
         lblFecha.Text = _eventoSeleccionado.FechaHora.ToString("dd MMMM yyyy - HH:mm");
-        lblDisponibles.Text = _eventoSeleccionado.NumeroBoletos.ToString();
+        int boletosDisponibles = _eventoSeleccionado.BoletosTotales - _eventoSeleccionado.NumeroBoletos;
+        lblDisponibles.Text = boletosDisponibles.ToString();
         lblPrecio.Text = $"${_eventoSeleccionado.Precio:N2}";
 
         // Mostrar Sede
@@ -69,8 +70,8 @@ public partial class VentaBoletosPage : ContentPage
         // Mostrar Totales
         lblBoletosTotales.Text = _eventoSeleccionado.BoletosTotales.ToString("N0"); // Formato con comas
 
-        // Calcular Ventas (Boletos Totales menos los Disponibles que quedan, multiplicado por el precio)
-        int boletosVendidos = _eventoSeleccionado.BoletosTotales - _eventoSeleccionado.NumeroBoletos;
+        // Calcular Ventas (NumeroBoletos ahora son los vendidos, multiplicado por el precio)
+        int boletosVendidos = _eventoSeleccionado.NumeroBoletos;
         decimal ingresosTotales = boletosVendidos * _eventoSeleccionado.Precio;
         lblTotalVentas.Text = $"${ingresosTotales:N2}";
 
@@ -88,6 +89,9 @@ public partial class VentaBoletosPage : ContentPage
         // 4. LA MAGIA: Ocultamos o mostramos el formulario de venta según la evaluación
         tarjetaInfo.IsVisible = true;
         panelVenta.IsVisible = evaluacion.PermiteVenta;
+        
+        // Mostrar botón de borrar si el evento ya finalizó
+        btnEliminarEvento.IsVisible = evaluacion.MensajeEstatus == "EVENTO FINALIZADO";
 
         // Limpiamos los campos por si había texto de otro evento
         txtCliente.Text = "";
@@ -111,12 +115,40 @@ public partial class VentaBoletosPage : ContentPage
             await DisplayAlert("Éxito", resultado.Mensaje, "Aceptar");
 
             // Actualizamos la etiqueta de boletos disponibles visualmente
-            lblDisponibles.Text = _eventoSeleccionado.NumeroBoletos.ToString();
+            int boletosDisponibles = _eventoSeleccionado.BoletosTotales - _eventoSeleccionado.NumeroBoletos;
+            lblDisponibles.Text = boletosDisponibles.ToString();
+            
+            // Actualizamos ventas visualmente
+            decimal ingresosTotales = _eventoSeleccionado.NumeroBoletos * _eventoSeleccionado.Precio;
+            lblTotalVentas.Text = $"${ingresosTotales:N2}";
 
             // Limpiamos los campos
             txtCliente.Text = "";
             txtTelefono.Text = "";
             txtCantidad.Text = "";
+        }
+    }
+
+    private async void OnEliminarClicked(object sender, EventArgs e)
+    {
+        if (_eventoSeleccionado == null) return;
+        
+        bool confirmar = await DisplayAlert("Eliminar Evento", $"¿Estás seguro de que deseas eliminar el evento {_eventoSeleccionado.EquipoLocal} vs {_eventoSeleccionado.EquipoVisitante}?", "Sí, eliminar", "Cancelar");
+        if (confirmar)
+        {
+            bool exito = await _controller.EliminarEventoAsync(_eventoSeleccionado);
+            if (exito)
+            {
+                await DisplayAlert("Éxito", "El evento ha sido eliminado.", "OK");
+                tarjetaInfo.IsVisible = false;
+                panelVenta.IsVisible = false;
+                pickerEvento.SelectedIndex = -1;
+                await CargarEventos();
+            }
+            else
+            {
+                await DisplayAlert("Error", "No se pudo eliminar el evento.", "OK");
+            }
         }
     }
 

@@ -7,12 +7,14 @@ public partial class RegistroEventoPage : ContentPage
 {
     private RegistroEventoController _controller;
     private List<Estadio> _listaEstadios;
+    private List<Equipo> _listaEquipos;
 
     public RegistroEventoPage()
 	{
 		InitializeComponent();
         _controller = new RegistroEventoController();
         _listaEstadios = new List<Estadio>();
+        _listaEquipos = new List<Equipo>();
     }
 
     // EL TRUCO ESTRELLA: OnAppearing se ejecuta cada vez que la pantalla se vuelve visible.
@@ -21,6 +23,7 @@ public partial class RegistroEventoPage : ContentPage
     {
         base.OnAppearing();
         await CargarEstadiosAsync();
+        await CargarEquiposAsync();
     }
 
     private async Task CargarEstadiosAsync()
@@ -52,18 +55,88 @@ public partial class RegistroEventoPage : ContentPage
         }
     }
 
+    private async Task CargarEquiposAsync()
+    {
+        _listaEquipos = await _controller.ObtenerEquiposAsync();
+        ActualizarPickersEquipos();
+    }
+
+    private void ActualizarPickersEquipos()
+    {
+        string localSeleccionado = pickerEquipoLocal.SelectedItem?.ToString();
+        string visitanteSeleccionado = pickerEquipoVisitante.SelectedItem?.ToString();
+
+        pickerEquipoLocal.Items.Clear();
+        pickerEquipoVisitante.Items.Clear();
+
+        foreach (var equipo in _listaEquipos)
+        {
+            if (equipo.Nombre != visitanteSeleccionado)
+                pickerEquipoLocal.Items.Add(equipo.Nombre);
+
+            if (equipo.Nombre != localSeleccionado)
+                pickerEquipoVisitante.Items.Add(equipo.Nombre);
+        }
+
+        pickerEquipoLocal.Items.Add("➕ Agregar nuevo equipo...");
+        pickerEquipoVisitante.Items.Add("➕ Agregar nuevo equipo...");
+
+        // Restaurar selecciones
+        if (!string.IsNullOrEmpty(localSeleccionado) && pickerEquipoLocal.Items.Contains(localSeleccionado))
+            pickerEquipoLocal.SelectedItem = localSeleccionado;
+
+        if (!string.IsNullOrEmpty(visitanteSeleccionado) && pickerEquipoVisitante.Items.Contains(visitanteSeleccionado))
+            pickerEquipoVisitante.SelectedItem = visitanteSeleccionado;
+    }
+
+    private async void OnEquipoLocalSeleccionado(object sender, EventArgs e)
+    {
+        if (pickerEquipoLocal.SelectedIndex == -1) return;
+
+        string seleccion = pickerEquipoLocal.SelectedItem.ToString();
+        if (seleccion == "➕ Agregar nuevo equipo...")
+        {
+            pickerEquipoLocal.SelectedIndex = -1;
+            await Navigation.PushModalAsync(new AgregarEquipoPage());
+        }
+        else
+        {
+            ActualizarPickersEquipos();
+        }
+    }
+
+    private async void OnEquipoVisitanteSeleccionado(object sender, EventArgs e)
+    {
+        if (pickerEquipoVisitante.SelectedIndex == -1) return;
+
+        string seleccion = pickerEquipoVisitante.SelectedItem.ToString();
+        if (seleccion == "➕ Agregar nuevo equipo...")
+        {
+            pickerEquipoVisitante.SelectedIndex = -1;
+            await Navigation.PushModalAsync(new AgregarEquipoPage());
+        }
+        else
+        {
+            ActualizarPickersEquipos();
+        }
+    }
+
     private async void OnGuardarClicked(object sender, EventArgs e)
     {
         Estadio estadioSeleccionado = null;
-        if (pickerEstadio.SelectedIndex >= 0 && pickerEstadio.SelectedIndex < _listaEstadios.Count)
+        if (pickerEstadio.SelectedIndex >= 0 && pickerEstadio.SelectedItem.ToString() != "➕ Agregar nuevo estadio...")
         {
-            estadioSeleccionado = _listaEstadios[pickerEstadio.SelectedIndex];
+            // Buscar por nombre ya que la lista de estadios tiene el mismo orden inicialmente, pero mejor buscar por nombre.
+            estadioSeleccionado = _listaEstadios.FirstOrDefault(e => e.Nombre == pickerEstadio.SelectedItem.ToString());
         }
+
+        string equipoLocal = pickerEquipoLocal.SelectedItem?.ToString();
+        string equipoVisitante = pickerEquipoVisitante.SelectedItem?.ToString();
 
         // Llamamos al nuevo método asíncrono
         var resultado = await _controller.ValidarYGuardarEventoAsync(
-            txtEquipoLocal.Text,
-            txtEquipoVisitante.Text,
+            equipoLocal,
+            equipoVisitante,
             txtBoletos.Text,
             txtPrecio.Text,
             dpFecha.Date ?? DateTime.Now,
@@ -80,11 +153,12 @@ public partial class RegistroEventoPage : ContentPage
             await DisplayAlert("Éxito", resultado.MensajeError, "OK");
 
             // Limpiar formulario tras guardar exitosamente
-            txtEquipoLocal.Text = "";
-            txtEquipoVisitante.Text = "";
+            pickerEquipoLocal.SelectedIndex = -1;
+            pickerEquipoVisitante.SelectedIndex = -1;
             txtBoletos.Text = "";
             txtPrecio.Text = "";
             pickerEstadio.SelectedIndex = -1;
+            ActualizarPickersEquipos();
         }
     }
 }

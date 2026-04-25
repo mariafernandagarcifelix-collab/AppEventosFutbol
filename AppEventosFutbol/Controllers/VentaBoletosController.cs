@@ -1,4 +1,4 @@
-﻿using AppEventosFutbol.Models;
+using AppEventosFutbol.Models;
 using AppEventosFutbol.Services;
 using System;
 using System.Collections.Generic;
@@ -27,6 +27,20 @@ namespace AppEventosFutbol.Controllers
             return (true, "VENTA ABIERTA", "#006847");
         }
 
+        // ELIMINAR EVENTO DE SUPABASE
+        public async Task<bool> EliminarEventoAsync(Evento evento)
+        {
+            try
+            {
+                await SupabaseConfig.Cliente.From<Evento>().Where(x => x.Id == evento.Id).Delete();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         // PROCESAR COMPRA REAL EN SUPABASE
         public async Task<(bool Exito, string Mensaje)> ProcesarCompraAsync(Evento evento, string nombre, string telefono, string cantidadText)
         {
@@ -36,13 +50,14 @@ namespace AppEventosFutbol.Controllers
             if (!int.TryParse(cantidadText, out int cantidad) || cantidad <= 0)
                 return (false, "Cantidad inválida.");
 
-            if (cantidad > evento.NumeroBoletos)
-                return (false, $"Solo quedan {evento.NumeroBoletos} boletos.");
+            int disponibles = evento.BoletosTotales - evento.NumeroBoletos;
+            if (cantidad > disponibles)
+                return (false, $"Solo quedan {disponibles} boletos.");
 
             try
             {
-                // 1. Actualizamos el objeto local
-                evento.NumeroBoletos -= cantidad;
+                // 1. Actualizamos el objeto local (ahora NumeroBoletos son los vendidos, así que sumamos)
+                evento.NumeroBoletos += cantidad;
 
                 // 2. Sincronizamos con Supabase (Filtramos por ID para actualizar solo esa fila)
                 await SupabaseConfig.Cliente

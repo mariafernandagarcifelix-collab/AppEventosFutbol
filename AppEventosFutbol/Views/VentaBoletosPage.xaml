@@ -76,7 +76,7 @@
                     <VerticalStackLayout Spacing="0">
 
                         <!-- Header con gradiente verde -->
-                        <Grid HeightRequest="110" Padding="22,18">
+                        <Grid HeightRequest="Auto" Padding="22,18">
                             <Grid.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                     <GradientStop Color="#006847" Offset="0.0"/>
@@ -103,9 +103,12 @@
                                         <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
                                         <Label x:Name="lblEstatus" FontAttributes="Bold" TextColor="White" FontSize="11" CharacterSpacing="0.5"/>
                                     </Border>
-                                    <Label x:Name="lblSede" Grid.Column="1" Text="📍 Estadio" 
-                                           TextColor="#99FFFFFF" HorizontalOptions="End" 
-                                           VerticalOptions="Center" FontSize="12"/>
+                                    <HorizontalStackLayout Grid.Column="1" HorizontalOptions="End" VerticalOptions="Center" Spacing="8">
+                                        <Button x:Name="btnEliminarEvento" Text="🗑️ Borrar" BackgroundColor="#CE1126" TextColor="White" FontAttributes="Bold" FontSize="11" Padding="8,4" CornerRadius="6" HeightRequest="28" IsVisible="False" Clicked="OnEliminarClicked" VerticalOptions="Center"/>
+                                        <Label x:Name="lblSede" Text="📍 Estadio" 
+                                               TextColor="#99FFFFFF" 
+                                               VerticalOptions="Center" FontSize="12"/>
+                                    </HorizontalStackLayout>
                                 </Grid>
                                 <Label x:Name="lblEquipos" Text="América vs Chivas" 
                                        TextColor="White" FontSize="24" FontAttributes="Bold" 

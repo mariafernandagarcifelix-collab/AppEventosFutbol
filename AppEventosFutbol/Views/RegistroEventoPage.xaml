@@ -73,10 +73,11 @@
                             <Border Grid.Column="0" BackgroundColor="{StaticResource InputBg}" 
                                     Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
                                 <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
-                                <Entry x:Name="txtEquipoLocal" Placeholder="Equipo Local" 
-                                       PlaceholderColor="{StaticResource TextMuted}" 
-                                       TextColor="{StaticResource TextPrimary}" FontSize="14" 
-                                       Margin="14,0" VerticalOptions="Center"/>
+                                <Picker x:Name="pickerEquipoLocal" Title="Equipo Local" 
+                                        TitleColor="{StaticResource TextMuted}" 
+                                        TextColor="{StaticResource TextPrimary}" 
+                                        Margin="14,0" VerticalOptions="Center"
+                                        SelectedIndexChanged="OnEquipoLocalSeleccionado"/>
                             </Border>
 
                             <!-- VS badge con gradiente -->
@@ -96,10 +97,11 @@
                             <Border Grid.Column="2" BackgroundColor="{StaticResource InputBg}" 
                                     Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
                                 <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
-                                <Entry x:Name="txtEquipoVisitante" Placeholder="Visitante" 
-                                       PlaceholderColor="{StaticResource TextMuted}" 
-                                       TextColor="{StaticResource TextPrimary}" FontSize="14" 
-                                       Margin="14,0" VerticalOptions="Center"/>
+                                <Picker x:Name="pickerEquipoVisitante" Title="Visitante" 
+                                        TitleColor="{StaticResource TextMuted}" 
+                                        TextColor="{StaticResource TextPrimary}" 
+                                        Margin="14,0" VerticalOptions="Center"
+                                        SelectedIndexChanged="OnEquipoVisitanteSeleccionado"/>
                             </Border>
                         </Grid>
 

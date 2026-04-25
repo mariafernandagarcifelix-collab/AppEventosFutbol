@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using AppEventosFutbol.Models;
@@ -20,8 +20,22 @@ namespace AppEventosFutbol.Controllers
             }
             catch
             {
-                // Si no hay internet, devolvemos una lista vacía para que la app no explote
+        // Si no hay internet, devolvemos una lista vacía para que la app no explote
                 return new List<Estadio>();
+            }
+        }
+
+        // 1.5 DESCARGAR EQUIPOS REALES DESDE SUPABASE
+        public async Task<List<Equipo>> ObtenerEquiposAsync()
+        {
+            try
+            {
+                var respuesta = await SupabaseConfig.Cliente.From<Equipo>().Get();
+                return respuesta.Models;
+            }
+            catch
+            {
+                return new List<Equipo>();
             }
         }
 
@@ -53,7 +67,7 @@ namespace AppEventosFutbol.Controllers
                     EquipoLocal = equipoLocal,
                     EquipoVisitante = equipoVisitante,
                     BoletosTotales = boletos,
-                    NumeroBoletos = boletos, // Al inicio, los disponibles son iguales a los totales
+                    NumeroBoletos = 0, // Al inicio se han vendido 0 boletos
                     Precio = precio,
                     FechaHora = fechaHoraEvento,
                     EstadioId = estadioSeleccionado.Id,
