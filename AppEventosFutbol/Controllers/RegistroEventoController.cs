@@ -61,6 +61,29 @@ namespace AppEventosFutbol.Controllers
 
             try
             {
+                // Validación de cruces de horarios
+                var respuestaEventos = await SupabaseConfig.Cliente.From<Evento>().Get();
+                var eventosExistentes = respuestaEventos.Models;
+                var fechaSolo = fechaHoraEvento.Date;
+
+                // 1. Validar Estadio
+                if (eventosExistentes.Any(e => e.FechaHora.Date == fechaSolo && e.EstadioId == estadioSeleccionado.Id))
+                {
+                    return (false, $"El estadio {estadioSeleccionado.Nombre} ya tiene un partido agendado para esta fecha.");
+                }
+
+                // 2. Validar Equipo Local
+                if (eventosExistentes.Any(e => e.FechaHora.Date == fechaSolo && (e.EquipoLocal == equipoLocal || e.EquipoVisitante == equipoLocal)))
+                {
+                    return (false, $"El equipo {equipoLocal} ya tiene un partido agendado para esta fecha.");
+                }
+
+                // 3. Validar Equipo Visitante
+                if (eventosExistentes.Any(e => e.FechaHora.Date == fechaSolo && (e.EquipoLocal == equipoVisitante || e.EquipoVisitante == equipoVisitante)))
+                {
+                    return (false, $"El equipo {equipoVisitante} ya tiene un partido agendado para esta fecha.");
+                }
+
                 // Si pasa las validaciones, armamos el "Paquete" (Modelo)
                 var nuevoEvento = new Evento
                 {

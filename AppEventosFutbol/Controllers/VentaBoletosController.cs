@@ -22,7 +22,16 @@ namespace AppEventosFutbol.Controllers
         public (bool PermiteVenta, string MensajeEstatus, string ColorEstatus) EvaluarDisponibilidad(Evento evento)
         {
             TimeSpan tiempoFaltante = evento.FechaHora - DateTime.Now;
-            if (tiempoFaltante.TotalDays < 0) return (false, "EVENTO FINALIZADO", "#555555");
+            
+            if (tiempoFaltante.TotalSeconds <= 0)
+            {
+                if (tiempoFaltante.TotalHours >= -2)
+                {
+                    return (false, "EN JUEGO", "#FFFFFF"); // Blanco
+                }
+                return (false, "EVENTO FINALIZADO", "#555555");
+            }
+            
             if (tiempoFaltante.TotalDays <= 3) return (false, "SOLO CONSULTA", "#CE1126");
             return (true, "VENTA ABIERTA", "#006847");
         }

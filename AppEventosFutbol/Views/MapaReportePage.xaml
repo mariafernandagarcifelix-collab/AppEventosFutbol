@@ -9,9 +9,27 @@
     <Grid>
         <maps:Map x:Name="mapaReportes" MapClicked="OnMapClicked" />
 
+        <!-- Top Overlay: Búsqueda y Favoritos -->
+        <VerticalStackLayout Margin="16,48,16,0" VerticalOptions="Start" Spacing="12">
+            <!-- Barra de Búsqueda -->
+            <Border BackgroundColor="{StaticResource CardBg}" Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="50">
+                <Border.StrokeShape><RoundRectangle CornerRadius="25"/></Border.StrokeShape>
+                <Border.Shadow><Shadow Brush="#40000000" Offset="0,4" Radius="10" Opacity="0.8"/></Border.Shadow>
+                <SearchBar x:Name="searchBarUbicacion" Placeholder="Buscar una ubicación..." 
+                           PlaceholderColor="{StaticResource TextMuted}" TextColor="{StaticResource TextPrimary}"
+                           CancelButtonColor="{StaticResource TextSecondary}"
+                           SearchButtonPressed="OnBuscarUbicacion" />
+            </Border>
+
+            <!-- Carrusel de Estadios con Eventos -->
+            <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                <HorizontalStackLayout x:Name="carouselEstadios" Spacing="8" />
+            </ScrollView>
+        </VerticalStackLayout>
+
         <!-- Banner de instrucción para ruta -->
         <Border x:Name="bannerInstruccion" IsVisible="False" BackgroundColor="{StaticResource WarningAmber}" 
-                Padding="16,12" Margin="32,48,32,0" VerticalOptions="Start" StrokeThickness="0">
+                Padding="16,12" Margin="32,140,32,0" VerticalOptions="Start" StrokeThickness="0">
             <Border.StrokeShape><RoundRectangle CornerRadius="12"/></Border.StrokeShape>
             <Border.Shadow><Shadow Brush="#40000000" Offset="0,4" Radius="10" Opacity="0.8"/></Border.Shadow>
             <Label Text="Toca en el mapa para marcar tu punto de origen 📍" 
@@ -20,7 +38,7 @@
 
         <!-- Tarjeta de Info de Ruta -->
         <Border x:Name="tarjetaRutaInfo" IsVisible="False" BackgroundColor="{StaticResource CardBg}" 
-                Padding="16" Margin="16,48,16,0" VerticalOptions="Start" StrokeThickness="1" Stroke="{StaticResource BorderSubtle}">
+                Padding="16" Margin="16,140,16,0" VerticalOptions="Start" StrokeThickness="1" Stroke="{StaticResource BorderSubtle}">
             <Border.StrokeShape><RoundRectangle CornerRadius="16"/></Border.StrokeShape>
             <Border.Shadow><Shadow Brush="#40000000" Offset="0,4" Radius="12" Opacity="0.8"/></Border.Shadow>
             <VerticalStackLayout Spacing="8">
@@ -137,5 +155,19 @@
 
             </VerticalStackLayout>
         </Border>
+
+        <!-- Loader / Activity Indicator -->
+        <Grid x:Name="gridCargando" IsVisible="False" BackgroundColor="#80000000">
+            <Border BackgroundColor="{StaticResource CardBg}" Padding="24"
+                    HorizontalOptions="Center" VerticalOptions="Center"
+                    Stroke="{StaticResource BorderSubtle}" StrokeThickness="1">
+                <Border.StrokeShape><RoundRectangle CornerRadius="16"/></Border.StrokeShape>
+                <Border.Shadow><Shadow Brush="#50000000" Offset="0,10" Radius="30" Opacity="0.95"/></Border.Shadow>
+                <VerticalStackLayout Spacing="16">
+                    <ActivityIndicator IsRunning="True" Color="{StaticResource MexGreen}" />
+                    <Label Text="Calculando ruta..." TextColor="White" FontAttributes="Bold" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
     </Grid>
 </ContentPage>

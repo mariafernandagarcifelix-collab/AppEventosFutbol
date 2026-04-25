@@ -40,6 +40,7 @@ public partial class MapaReportePage : ContentPage
             mapaReportes.MapElements.Clear();
             _diccionarioPines.Clear();
             tarjetaEvento.IsVisible = false;
+            carouselEstadios.Children.Clear();
 
             // 2. MAGIA: Usamos 'await' para traer los datos reales de Supabase
             _eventosProximos = await _controller.ObtenerEventosProximosMapaAsync();
@@ -64,6 +65,28 @@ public partial class MapaReportePage : ContentPage
 
                     // Guardamos la relación en el diccionario (Pin -> Evento)
                     _diccionarioPines.Add(pin, evento);
+
+                    // Agregar botón al carrusel de favoritos
+                    var btnChip = new Button
+                    {
+                        Text = $"🏟️ {evento.EstadioNombre}",
+                        HeightRequest = 35,
+                        Padding = new Thickness(12, 0),
+                        FontSize = 12,
+                        CornerRadius = 17,
+                        BackgroundColor = Colors.White,
+                        TextColor = Colors.Black,
+                        FontAttributes = FontAttributes.Bold
+                    };
+
+                    btnChip.Clicked += (s, args) => 
+                    {
+                        // Mover cámara y mostrar tarjeta
+                        mapaReportes.MoveToRegion(MapSpan.FromCenterAndRadius(pin.Location, Distance.FromKilometers(2)));
+                        MostrarTarjetaEvento(evento);
+                    };
+
+                    carouselEstadios.Children.Add(btnChip);
                 }
             }
 
@@ -88,21 +111,26 @@ public partial class MapaReportePage : ContentPage
             // CORRECCIÓN 4: Buscamos el evento usando el pin como "llave" del diccionario
             if (_diccionarioPines.TryGetValue(pinTocado, out Evento eventoSeleccionado))
             {
-                _eventoSeleccionado = eventoSeleccionado;
-
-                // Llenamos nuestra tarjeta personalizada con los datos que recuperamos
-                lblSede.Text = $"🏟️ {eventoSeleccionado.EstadioNombre}";
-                lblEquipos.Text = $"{eventoSeleccionado.EquipoLocal} vs {eventoSeleccionado.EquipoVisitante}";
-                lblFecha.Text = eventoSeleccionado.FechaHora.ToString("dd MMMM, HH:mm hrs");
-                lblBoletos.Text = eventoSeleccionado.NumeroBoletos.ToString("N0");
-                lblPrecio.Text = $"${eventoSeleccionado.Precio:N2}";
-
-                // Mostramos la tarjeta con animación
-                tarjetaEvento.Opacity = 0;
-                tarjetaEvento.IsVisible = true;
-                tarjetaEvento.FadeTo(1, 250);
+                MostrarTarjetaEvento(eventoSeleccionado);
             }
         }
+    }
+
+    private void MostrarTarjetaEvento(Evento eventoSeleccionado)
+    {
+        _eventoSeleccionado = eventoSeleccionado;
+
+        // Llenamos nuestra tarjeta personalizada con los datos que recuperamos
+        lblSede.Text = $"🏟️ {eventoSeleccionado.EstadioNombre}";
+        lblEquipos.Text = $"{eventoSeleccionado.EquipoLocal} vs {eventoSeleccionado.EquipoVisitante}";
+        lblFecha.Text = eventoSeleccionado.FechaHora.ToString("dd MMMM, HH:mm hrs");
+        lblBoletos.Text = (eventoSeleccionado.BoletosTotales - eventoSeleccionado.NumeroBoletos).ToString("N0");
+        lblPrecio.Text = $"${eventoSeleccionado.Precio:N2}";
+
+        // Mostramos la tarjeta con animación
+        tarjetaEvento.Opacity = 0;
+        tarjetaEvento.IsVisible = true;
+        tarjetaEvento.FadeTo(1, 250);
     }
 
     private async void OnCerrarTarjetaClicked(object sender, EventArgs e)
@@ -133,10 +161,16 @@ public partial class MapaReportePage : ContentPage
             _esperandoOrigen = false;
             bannerInstruccion.IsVisible = false;
 
+            // Mostrar animación de carga
+            gridCargando.IsVisible = true;
+
             // Trazar ruta nativa usando OSRM
             Location origen = e.Location;
             Location destino = new Location(_eventoSeleccionado.Latitud, _eventoSeleccionado.Longitud);
             await TrazarRutaNativaAsync(origen, destino);
+
+            // Ocultar animación de carga
+            gridCargando.IsVisible = false;
         }
     }
 
@@ -169,7 +203,16 @@ public partial class MapaReportePage : ContentPage
                     double durationMin = Math.Ceiling(durationSeconds / 60.0);
 
                     lblRutaDistancia.Text = $"{distanceKm:0.#} km";
-                    lblRutaTiempo.Text = $"{durationMin} min";
+                    if (durationMin >= 60)
+                    {
+                        int hours = (int)(durationMin / 60);
+                        int mins = (int)(durationMin % 60);
+                        lblRutaTiempo.Text = $"{hours} h {mins} min";
+                    }
+                    else
+                    {
+                        lblRutaTiempo.Text = $"{durationMin} min";
+                    }
 
                     // Obtener nombre de la calle usando Geocoding
                     try
@@ -203,12 +246,18 @@ public partial class MapaReportePage : ContentPage
                         StrokeWidth = 6
                     };
 
+                    // Añadir el punto exacto de origen para que la línea lo toque
+                    polyline.Geopath.Add(origen);
+
                     foreach (var coord in coordinates.EnumerateArray())
                     {
                         double lon = coord[0].GetDouble();
                         double lat = coord[1].GetDouble();
                         polyline.Geopath.Add(new Location(lat, lon));
                     }
+
+                    // Añadir el punto exacto de destino para que la línea lo toque
+                    polyline.Geopath.Add(destino);
 
                     // Limpiar rutas previas
                     mapaReportes.MapElements.Clear();
@@ -217,7 +266,7 @@ public partial class MapaReportePage : ContentPage
                     var pinOrigen = new Pin 
                     { 
                         Label = "Tu Ubicación", 
-                        Type = PinType.Generic, 
+                        Type = PinType.SearchResult, 
                         Location = origen 
                     };
                     mapaReportes.Pins.Add(pinOrigen);
@@ -253,6 +302,44 @@ public partial class MapaReportePage : ContentPage
         if (pinOrigen != null)
         {
             mapaReportes.Pins.Remove(pinOrigen);
+        }
+    }
+
+    private async void OnBuscarUbicacion(object sender, EventArgs e)
+    {
+        string query = searchBarUbicacion.Text;
+        if (string.IsNullOrWhiteSpace(query)) return;
+
+        gridCargando.IsVisible = true;
+        try
+        {
+            var locations = await Geocoding.Default.GetLocationsAsync(query);
+            var location = locations?.FirstOrDefault();
+
+            if (location != null)
+            {
+                // Agregar pin temporal de busqueda
+                var pinBusqueda = new Pin 
+                { 
+                    Label = query, 
+                    Type = PinType.SearchResult, 
+                    Location = location 
+                };
+                mapaReportes.Pins.Add(pinBusqueda);
+                mapaReportes.MoveToRegion(MapSpan.FromCenterAndRadius(location, Distance.FromKilometers(2)));
+            }
+            else
+            {
+                await DisplayAlert("Sin resultados", "No se encontró la ubicación ingresada.", "OK");
+            }
+        }
+        catch (Exception)
+        {
+            await DisplayAlert("Error", "Problema al buscar la ubicación. Verifica tu conexión a internet.", "OK");
+        }
+        finally
+        {
+            gridCargando.IsVisible = false;
         }
     }
 }

@@ -8,6 +8,7 @@ public partial class RegistroEventoPage : ContentPage
     private RegistroEventoController _controller;
     private List<Estadio> _listaEstadios;
     private List<Equipo> _listaEquipos;
+    private bool _actualizandoPickers = false;
 
     public RegistroEventoPage()
 	{
@@ -15,6 +16,10 @@ public partial class RegistroEventoPage : ContentPage
         _controller = new RegistroEventoController();
         _listaEstadios = new List<Estadio>();
         _listaEquipos = new List<Equipo>();
+
+        // Configurar la hora y fecha inicial a la actual
+        tpHora.Time = DateTime.Now.TimeOfDay;
+        dpFecha.Date = DateTime.Now.Date;
     }
 
     // EL TRUCO ESTRELLA: OnAppearing se ejecuta cada vez que la pantalla se vuelve visible.
@@ -50,8 +55,10 @@ public partial class RegistroEventoPage : ContentPage
         if (seleccion == "➕ Agregar nuevo estadio...")
         {
             pickerEstadio.SelectedIndex = -1;
-            // Abrimos el mapa de agregar estadio
-            await Navigation.PushModalAsync(new AgregarEstadioPage());
+            // Abrimos el mapa de agregar estadio y recargamos al cerrar
+            var modalPage = new AgregarEstadioPage();
+            modalPage.Disappearing += async (s, args) => await CargarEstadiosAsync();
+            await Navigation.PushModalAsync(modalPage);
         }
     }
 
@@ -63,60 +70,82 @@ public partial class RegistroEventoPage : ContentPage
 
     private void ActualizarPickersEquipos()
     {
-        string localSeleccionado = pickerEquipoLocal.SelectedItem?.ToString();
-        string visitanteSeleccionado = pickerEquipoVisitante.SelectedItem?.ToString();
+        // Si ya estamos actualizando, no hacemos nada para romper el bucle
+        if (_actualizandoPickers) return;
 
-        pickerEquipoLocal.Items.Clear();
-        pickerEquipoVisitante.Items.Clear();
+        // Ponemos el candado
+        _actualizandoPickers = true;
 
-        foreach (var equipo in _listaEquipos)
+        try
         {
-            if (equipo.Nombre != visitanteSeleccionado)
-                pickerEquipoLocal.Items.Add(equipo.Nombre);
+            string localSeleccionado = pickerEquipoLocal.SelectedItem?.ToString();
+            string visitanteSeleccionado = pickerEquipoVisitante.SelectedItem?.ToString();
 
-            if (equipo.Nombre != localSeleccionado)
-                pickerEquipoVisitante.Items.Add(equipo.Nombre);
+            pickerEquipoLocal.Items.Clear();
+            pickerEquipoVisitante.Items.Clear();
+
+            foreach (var equipo in _listaEquipos)
+            {
+                if (equipo.Nombre != visitanteSeleccionado)
+                    pickerEquipoLocal.Items.Add(equipo.Nombre);
+
+                if (equipo.Nombre != localSeleccionado)
+                    pickerEquipoVisitante.Items.Add(equipo.Nombre);
+            }
+
+            pickerEquipoLocal.Items.Add("➕ Agregar nuevo equipo...");
+            pickerEquipoVisitante.Items.Add("➕ Agregar nuevo equipo...");
+
+            // Restaurar selecciones (Esto es lo que causaba el bucle)
+            if (!string.IsNullOrEmpty(localSeleccionado) && pickerEquipoLocal.Items.Contains(localSeleccionado))
+                pickerEquipoLocal.SelectedItem = localSeleccionado;
+
+            if (!string.IsNullOrEmpty(visitanteSeleccionado) && pickerEquipoVisitante.Items.Contains(visitanteSeleccionado))
+                pickerEquipoVisitante.SelectedItem = visitanteSeleccionado;
         }
-
-        pickerEquipoLocal.Items.Add("➕ Agregar nuevo equipo...");
-        pickerEquipoVisitante.Items.Add("➕ Agregar nuevo equipo...");
-
-        // Restaurar selecciones
-        if (!string.IsNullOrEmpty(localSeleccionado) && pickerEquipoLocal.Items.Contains(localSeleccionado))
-            pickerEquipoLocal.SelectedItem = localSeleccionado;
-
-        if (!string.IsNullOrEmpty(visitanteSeleccionado) && pickerEquipoVisitante.Items.Contains(visitanteSeleccionado))
-            pickerEquipoVisitante.SelectedItem = visitanteSeleccionado;
+        finally
+        {
+            // Quitamos el candado SIEMPRE, incluso si hay un error
+            _actualizandoPickers = false;
+        }
     }
 
     private async void OnEquipoLocalSeleccionado(object sender, EventArgs e)
     {
-        if (pickerEquipoLocal.SelectedIndex == -1) return;
+        // Agregamos la validación del candado aquí
+        if (_actualizandoPickers || pickerEquipoLocal.SelectedIndex == -1) return;
 
         string seleccion = pickerEquipoLocal.SelectedItem.ToString();
         if (seleccion == "➕ Agregar nuevo equipo...")
         {
             pickerEquipoLocal.SelectedIndex = -1;
-            await Navigation.PushModalAsync(new AgregarEquipoPage());
+            var modalPage = new AgregarEquipoPage();
+            modalPage.Disappearing += async (s, args) => await CargarEquiposAsync();
+            await Navigation.PushModalAsync(modalPage);
         }
         else
         {
+            await Task.Delay(100);
             ActualizarPickersEquipos();
         }
     }
 
     private async void OnEquipoVisitanteSeleccionado(object sender, EventArgs e)
     {
-        if (pickerEquipoVisitante.SelectedIndex == -1) return;
+        // Agregamos la validación del candado aquí
+        if (_actualizandoPickers || pickerEquipoVisitante.SelectedIndex == -1) return;
 
         string seleccion = pickerEquipoVisitante.SelectedItem.ToString();
         if (seleccion == "➕ Agregar nuevo equipo...")
         {
             pickerEquipoVisitante.SelectedIndex = -1;
-            await Navigation.PushModalAsync(new AgregarEquipoPage());
+            var modalPage = new AgregarEquipoPage();
+            modalPage.Disappearing += async (s, args) => await CargarEquiposAsync();
+            await Navigation.PushModalAsync(modalPage);
         }
         else
         {
+            await Task.Delay(100);
             ActualizarPickersEquipos();
         }
     }

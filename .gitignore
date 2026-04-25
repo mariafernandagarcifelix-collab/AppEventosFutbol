@@ -366,12 +366,11 @@ FodyWeavers.xsd
 AppEventosFutbol/Services/Secretos.cs
 
 # Ocultar credenciales de Google Maps Android
-AppEventosFutbol/Platforms/Android/Resources/values/secrets.xaml
+AppEventosFutbol/Platforms/Android/Resources/values/secrets.xml
 
-AppEventosFutbol/Platforms/Android/Resources/values/secrets.xaml.cs
 
 # Ocultar archivos secretos sin importar en qué carpeta estén
 **/Secretos.cs
-**/secrets.xaml
+**/secrets.xml
 
 

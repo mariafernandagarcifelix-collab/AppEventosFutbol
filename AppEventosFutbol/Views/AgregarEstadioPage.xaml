@@ -11,6 +11,18 @@
 
         <maps:Map x:Name="mapaEstadio" Grid.Row="0" MapClicked="OnMapClicked"/>
 
+        <!-- Top Overlay: Búsqueda -->
+        <VerticalStackLayout Grid.Row="0" Margin="16,48,16,0" VerticalOptions="Start" Spacing="12">
+            <Border BackgroundColor="{StaticResource CardBg}" Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="50">
+                <Border.StrokeShape><RoundRectangle CornerRadius="25"/></Border.StrokeShape>
+                <Border.Shadow><Shadow Brush="#40000000" Offset="0,4" Radius="10" Opacity="0.8"/></Border.Shadow>
+                <SearchBar x:Name="searchBarUbicacion" Placeholder="Buscar un estadio o ciudad..." 
+                           PlaceholderColor="{StaticResource TextMuted}" TextColor="{StaticResource TextPrimary}"
+                           CancelButtonColor="{StaticResource TextSecondary}"
+                           SearchButtonPressed="OnBuscarUbicacion" />
+            </Border>
+        </VerticalStackLayout>
+
         <!-- Bottom sheet premium dark -->
         <Border Grid.Row="1" BackgroundColor="{StaticResource CardBg}" 
                 Stroke="{StaticResource BorderSubtle}" StrokeThickness="1"
@@ -79,5 +91,19 @@
 
             </VerticalStackLayout>
         </Border>
+
+        <!-- Loader / Activity Indicator -->
+        <Grid x:Name="gridCargando" Grid.Row="0" Grid.RowSpan="2" IsVisible="False" BackgroundColor="#80000000" ZIndex="999">
+            <Border BackgroundColor="{StaticResource CardBg}" Padding="24"
+                    HorizontalOptions="Center" VerticalOptions="Center"
+                    Stroke="{StaticResource BorderSubtle}" StrokeThickness="1">
+                <Border.StrokeShape><RoundRectangle CornerRadius="16"/></Border.StrokeShape>
+                <Border.Shadow><Shadow Brush="#50000000" Offset="0,10" Radius="30" Opacity="0.95"/></Border.Shadow>
+                <VerticalStackLayout Spacing="16">
+                    <ActivityIndicator IsRunning="True" Color="{StaticResource MexGreen}" />
+                    <Label Text="Cargando..." TextColor="White" FontAttributes="Bold" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
     </Grid>
 </ContentPage>

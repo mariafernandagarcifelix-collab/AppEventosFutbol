@@ -8,6 +8,7 @@ public partial class VentaBoletosPage : ContentPage
     private VentaBoletosController _controller;
     private List<Evento> _listaEventos;
     private Evento _eventoSeleccionado;
+    private IDispatcherTimer _timerEnJuego;
 
     public VentaBoletosPage()
 	{
@@ -54,6 +55,13 @@ public partial class VentaBoletosPage : ContentPage
     {
         if (pickerEvento.SelectedIndex == -1) return;
 
+        // Detener timer anterior si existe
+        if (_timerEnJuego != null)
+        {
+            _timerEnJuego.Stop();
+            _timerEnJuego = null;
+        }
+
         // 1. Obtenemos el evento seleccionado
         _eventoSeleccionado = _listaEventos[pickerEvento.SelectedIndex];
 
@@ -83,8 +91,21 @@ public partial class VentaBoletosPage : ContentPage
 
         // Actualizamos la etiqueta de estatus visualmente
         lblEstatus.Text = evaluacion.MensajeEstatus;
-        badgeEstatus.BackgroundColor = Color.FromArgb(evaluacion.ColorEstatus == "#006847" ? "#006847" :
-                                                      evaluacion.ColorEstatus == "#CE1126" ? "#CE1126" : "#555555");
+        badgeEstatus.BackgroundColor = Color.FromArgb(
+            evaluacion.ColorEstatus == "#006847" ? "#006847" :
+            evaluacion.ColorEstatus == "#CE1126" ? "#CE1126" : 
+            evaluacion.ColorEstatus == "#FFFFFF" ? "#FFFFFF" : "#555555");
+        
+        lblEstatus.TextColor = evaluacion.ColorEstatus == "#FFFFFF" ? Colors.Black : Colors.White;
+
+        if (evaluacion.MensajeEstatus == "EN JUEGO")
+        {
+            ActualizarTiempoEnJuego();
+            _timerEnJuego = Application.Current.Dispatcher.CreateTimer();
+            _timerEnJuego.Interval = TimeSpan.FromSeconds(1);
+            _timerEnJuego.Tick += (s, ev) => ActualizarTiempoEnJuego();
+            _timerEnJuego.Start();
+        }
 
         // 4. LA MAGIA: Ocultamos o mostramos el formulario de venta según la evaluación
         tarjetaInfo.IsVisible = true;
@@ -168,6 +189,30 @@ public partial class VentaBoletosPage : ContentPage
         {
             // Si borra el texto o pone letras, regresamos a cero
             txtTotalPagar.Text = "$0.00";
+        }
+    }
+
+    private void ActualizarTiempoEnJuego()
+    {
+        if (_eventoSeleccionado == null) return;
+        
+        var tiempoTranscurrido = DateTime.Now - _eventoSeleccionado.FechaHora;
+        if (tiempoTranscurrido.TotalHours >= 2)
+        {
+            if (_timerEnJuego != null)
+            {
+                _timerEnJuego.Stop();
+            }
+            lblEstatus.Text = "EVENTO FINALIZADO";
+            badgeEstatus.BackgroundColor = Color.FromArgb("#555555");
+            lblEstatus.TextColor = Colors.White;
+            btnEliminarEvento.IsVisible = true;
+        }
+        else
+        {
+            lblEstatus.Text = $"EN JUEGO - {(int)tiempoTranscurrido.TotalMinutes:D2}:{tiempoTranscurrido.Seconds:D2}";
+            badgeEstatus.BackgroundColor = Color.FromArgb("#FFFFFF");
+            lblEstatus.TextColor = Colors.Black;
         }
     }
 }

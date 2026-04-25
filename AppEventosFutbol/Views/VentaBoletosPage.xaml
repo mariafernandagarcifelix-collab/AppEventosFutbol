@@ -76,7 +76,7 @@
                     <VerticalStackLayout Spacing="0">
 
                         <!-- Header con gradiente verde -->
-                        <Grid HeightRequest="Auto" Padding="22,18">
+                        <Grid Padding="22,18">
                             <Grid.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                                     <GradientStop Color="#006847" Offset="0.0"/>
@@ -104,7 +104,6 @@
                                         <Label x:Name="lblEstatus" FontAttributes="Bold" TextColor="White" FontSize="11" CharacterSpacing="0.5"/>
                                     </Border>
                                     <HorizontalStackLayout Grid.Column="1" HorizontalOptions="End" VerticalOptions="Center" Spacing="8">
-                                        <Button x:Name="btnEliminarEvento" Text="🗑️ Borrar" BackgroundColor="#CE1126" TextColor="White" FontAttributes="Bold" FontSize="11" Padding="8,4" CornerRadius="6" HeightRequest="28" IsVisible="False" Clicked="OnEliminarClicked" VerticalOptions="Center"/>
                                         <Label x:Name="lblSede" Text="📍 Estadio" 
                                                TextColor="#99FFFFFF" 
                                                VerticalOptions="Center" FontSize="12"/>
@@ -174,6 +173,12 @@
 
                     </VerticalStackLayout>
                 </Border>
+
+                <!-- BOTÓN ELIMINAR EVENTO -->
+                <Button x:Name="btnEliminarEvento" Text="🗑️ ELIMINAR EVENTO" 
+                        BackgroundColor="#CE1126" TextColor="White" FontAttributes="Bold" 
+                        FontSize="15" CharacterSpacing="0.8" CornerRadius="16" HeightRequest="58" 
+                        IsVisible="False" Clicked="OnEliminarClicked"/>
 
                 <!-- PANEL DE VENTA -->
                 <VerticalStackLayout x:Name="panelVenta" Spacing="14" IsVisible="False">
