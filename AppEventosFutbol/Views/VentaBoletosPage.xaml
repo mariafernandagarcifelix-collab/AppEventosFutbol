@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AppEventosFutbol.Views.VentaBoletosPage"
+             Title="VentaBoletosPage"
+             BackgroundColor="{StaticResource DarkBg}">
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
+
+            <!-- HERO BANNER — rojo premium nocturno -->
+            <Grid HeightRequest="200">
+                <BoxView>
+                    <BoxView.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#CE1126" Offset="0.0"/>
+                            <GradientStop Color="#7A0A16" Offset="0.45"/>
+                            <GradientStop Color="#0D1117" Offset="1.0"/>
+                        </LinearGradientBrush>
+                    </BoxView.Background>
+                </BoxView>
+
+                <!-- Decoración sutil -->
+                <BoxView Opacity="0.05" WidthRequest="400" HeightRequest="400" 
+                         Rotation="-30" TranslationX="120" TranslationY="-80">
+                    <BoxView.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="White" Offset="0.0"/>
+                            <GradientStop Color="Transparent" Offset="0.25"/>
+                        </LinearGradientBrush>
+                    </BoxView.Background>
+                </BoxView>
+
+                <VerticalStackLayout VerticalOptions="End" Padding="24,0,24,26" Spacing="6">
+                    <Border BackgroundColor="#22FFFFFF" StrokeThickness="0" Padding="10,5" 
+                            HorizontalOptions="Start" Margin="0,0,0,4">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                        <Label Text="🎟️  TAQUILLA" TextColor="#BBFFFFFF" FontSize="11" 
+                               FontAttributes="Bold" CharacterSpacing="2"/>
+                    </Border>
+                    <Label Text="Venta y Consulta" TextColor="White" FontSize="28" 
+                           FontAttributes="Bold" CharacterSpacing="-0.3"/>
+                    <Label Text="Gestión de boletaje en tiempo real" TextColor="#70FFFFFF" FontSize="13"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <VerticalStackLayout Padding="20,20,20,34" Spacing="18">
+
+                <!-- SELECTOR DE EVENTO -->
+                <Border BackgroundColor="{StaticResource CardBg}" 
+                        Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" 
+                        Padding="20">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="20"/></Border.StrokeShape>
+                    <Border.Shadow><Shadow Brush="#30000000" Offset="0,6" Radius="20" Opacity="0.8"/></Border.Shadow>
+                    <VerticalStackLayout Spacing="12">
+                        <HorizontalStackLayout Spacing="8">
+                            <BoxView WidthRequest="4" HeightRequest="20" Color="{StaticResource MexRed}" CornerRadius="2" VerticalOptions="Center"/>
+                            <Label Text="SELECCIONA UN PARTIDO" Style="{StaticResource SectionLabel}"/>
+                        </HorizontalStackLayout>
+                        <Border BackgroundColor="{StaticResource InputBg}" 
+                                Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
+                            <Picker x:Name="pickerEvento" TextColor="{StaticResource TextPrimary}" 
+                                    Title="Selecciona el partido..." 
+                                    TitleColor="{StaticResource TextMuted}" 
+                                    Margin="14,0" SelectedIndexChanged="OnEventoSeleccionado"/>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- TARJETA INFO DEL EVENTO — estilo ticket premium -->
+                <Border x:Name="tarjetaInfo" BackgroundColor="{StaticResource CardBg}" 
+                        Stroke="{StaticResource BorderSubtle}" StrokeThickness="1"
+                        Padding="0" IsVisible="False">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="20"/></Border.StrokeShape>
+                    <Border.Shadow><Shadow Brush="#30000000" Offset="0,8" Radius="24" Opacity="0.9"/></Border.Shadow>
+                    <VerticalStackLayout Spacing="0">
+
+                        <!-- Header con gradiente verde -->
+                        <Grid HeightRequest="110" Padding="22,18">
+                            <Grid.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#006847" Offset="0.0"/>
+                                    <GradientStop Color="#003D2A" Offset="0.7"/>
+                                    <GradientStop Color="#0D1117" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Grid.Background>
+
+                            <!-- Decoración sutil en header -->
+                            <BoxView Opacity="0.05" WidthRequest="200" HeightRequest="200" 
+                                     Rotation="20" TranslationX="100" TranslationY="-30"
+                                     HorizontalOptions="End">
+                                <BoxView.Background>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="White" Offset="0.0"/>
+                                        <GradientStop Color="Transparent" Offset="1.0"/>
+                                    </RadialGradientBrush>
+                                </BoxView.Background>
+                            </BoxView>
+
+                            <VerticalStackLayout VerticalOptions="Center" Spacing="8">
+                                <Grid ColumnDefinitions="Auto, *">
+                                    <Border x:Name="badgeEstatus" Grid.Column="0" Padding="12,5" StrokeThickness="0">
+                                        <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                                        <Label x:Name="lblEstatus" FontAttributes="Bold" TextColor="White" FontSize="11" CharacterSpacing="0.5"/>
+                                    </Border>
+                                    <Label x:Name="lblSede" Grid.Column="1" Text="📍 Estadio" 
+                                           TextColor="#99FFFFFF" HorizontalOptions="End" 
+                                           VerticalOptions="Center" FontSize="12"/>
+                                </Grid>
+                                <Label x:Name="lblEquipos" Text="América vs Chivas" 
+                                       TextColor="White" FontSize="24" FontAttributes="Bold" 
+                                       CharacterSpacing="-0.3"/>
+                                <Label x:Name="lblFecha" Text="Fecha del evento" 
+                                       TextColor="#88FFFFFF" FontSize="13"/>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <!-- Stats grid — patrón checkerboard sutil -->
+                        <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="*, *" 
+                              RowSpacing="0" ColumnSpacing="0" Padding="0">
+
+                            <Border Grid.Row="0" Grid.Column="0" 
+                                    BackgroundColor="{StaticResource SurfaceDim}" 
+                                    StrokeThickness="0" Padding="18,16">
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="BOLETOS TOTALES" TextColor="{StaticResource TextGray}" 
+                                           FontSize="10" CharacterSpacing="0.8" FontAttributes="Bold"/>
+                                    <Label x:Name="lblBoletosTotales" Text="50,000" 
+                                           TextColor="{StaticResource TextPrimary}" 
+                                           FontSize="20" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <Border Grid.Row="0" Grid.Column="1" 
+                                    BackgroundColor="{StaticResource CardBg}" 
+                                    StrokeThickness="0" Padding="18,16">
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="TOTAL DE VENTAS" TextColor="{StaticResource TextGray}" 
+                                           FontSize="10" CharacterSpacing="0.8" FontAttributes="Bold"/>
+                                    <Label x:Name="lblTotalVentas" Text="$0.00" 
+                                           TextColor="{StaticResource MexGreen}" 
+                                           FontSize="20" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <Border Grid.Row="1" Grid.Column="0" 
+                                    BackgroundColor="{StaticResource CardBg}" 
+                                    StrokeThickness="0" Padding="18,16">
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="DISPONIBLES" TextColor="{StaticResource TextGray}" 
+                                           FontSize="10" CharacterSpacing="0.8" FontAttributes="Bold"/>
+                                    <Label x:Name="lblDisponibles" Text="2,500" 
+                                           TextColor="{StaticResource SuccessGreen}" 
+                                           FontSize="22" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <Border Grid.Row="1" Grid.Column="1" 
+                                    BackgroundColor="{StaticResource SurfaceDim}" 
+                                    StrokeThickness="0" Padding="18,16">
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="PRECIO UNITARIO" TextColor="{StaticResource TextGray}" 
+                                           FontSize="10" CharacterSpacing="0.8" FontAttributes="Bold"/>
+                                    <Label x:Name="lblPrecio" Text="$1,200.00" 
+                                           TextColor="{StaticResource MexGold}" 
+                                           FontSize="20" FontAttributes="Bold"/>
+                                </VerticalStackLayout>
+                            </Border>
+
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- PANEL DE VENTA -->
+                <VerticalStackLayout x:Name="panelVenta" Spacing="14" IsVisible="False">
+
+                    <Border BackgroundColor="{StaticResource CardBg}" 
+                            Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" 
+                            Padding="22">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="20"/></Border.StrokeShape>
+                        <Border.Shadow><Shadow Brush="#30000000" Offset="0,6" Radius="20" Opacity="0.8"/></Border.Shadow>
+                        <VerticalStackLayout Spacing="16">
+
+                            <HorizontalStackLayout Spacing="8">
+                                <BoxView WidthRequest="4" HeightRequest="20" Color="{StaticResource MexGreen}" CornerRadius="2" VerticalOptions="Center"/>
+                                <Label Text="DATOS DEL COMPRADOR" Style="{StaticResource SectionLabel}"/>
+                            </HorizontalStackLayout>
+
+                            <Border BackgroundColor="{StaticResource InputBg}" 
+                                    Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
+                                <Entry x:Name="txtCliente" Placeholder="Nombre del Cliente" 
+                                       PlaceholderColor="{StaticResource TextMuted}" 
+                                       TextColor="{StaticResource TextPrimary}" FontSize="14" 
+                                       Margin="14,0" VerticalOptions="Center"/>
+                            </Border>
+
+                            <Border BackgroundColor="{StaticResource InputBg}" 
+                                    Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
+                                <Entry x:Name="txtTelefono" Placeholder="Teléfono (10 dígitos)" 
+                                       PlaceholderColor="{StaticResource TextMuted}" 
+                                       Keyboard="Telephone" TextColor="{StaticResource TextPrimary}" 
+                                       FontSize="14" Margin="14,0" VerticalOptions="Center"/>
+                            </Border>
+
+                            <Grid ColumnDefinitions="*, *" ColumnSpacing="12">
+                                <VerticalStackLayout Grid.Column="0" Spacing="8">
+                                    <Label Text="CANTIDAD" Style="{StaticResource SectionLabel}"/>
+                                    <Border BackgroundColor="{StaticResource InputBg}" 
+                                            Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
+                                        <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
+                                        <Entry x:Name="txtCantidad" Placeholder="Boletos" 
+                                               PlaceholderColor="{StaticResource TextMuted}" 
+                                               Keyboard="Numeric" TextColor="{StaticResource TextPrimary}" 
+                                               FontSize="14" Margin="14,0" VerticalOptions="Center" 
+                                               TextChanged="OnCantidadChanged"/>
+                                    </Border>
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" Spacing="8">
+                                    <Label Text="TOTAL A PAGAR" TextColor="{StaticResource MexGreen}" 
+                                           FontSize="11" FontAttributes="Bold" CharacterSpacing="0.8"/>
+                                    <Border BackgroundColor="{StaticResource MexGreenSubtle}" 
+                                            Stroke="{StaticResource MexGreenDark}" StrokeThickness="1.5" HeightRequest="52">
+                                        <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
+                                        <Entry x:Name="txtTotalPagar" Text="$0.00" IsReadOnly="True" 
+                                               TextColor="{StaticResource MexGreen}" FontAttributes="Bold" 
+                                               FontSize="17" Margin="14,0" HorizontalTextAlignment="Center" 
+                                               VerticalOptions="Center"/>
+                                    </Border>
+                                </VerticalStackLayout>
+                            </Grid>
+
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Botón de compra con gradiente -->
+                    <Border StrokeThickness="0" Padding="0" HeightRequest="58">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="16"/></Border.StrokeShape>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#00A86B" Offset="0.0"/>
+                                <GradientStop Color="#006847" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Button Text="🎟️  COMPRAR BOLETOS" 
+                                BackgroundColor="Transparent"
+                                TextColor="White" FontAttributes="Bold" FontSize="15" 
+                                CharacterSpacing="0.8"
+                                Clicked="OnComprarClicked"/>
+                    </Border>
+
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

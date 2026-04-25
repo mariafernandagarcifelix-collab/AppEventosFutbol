@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
+             xmlns:sensors="clr-namespace:Microsoft.Maui.Devices.Sensors;assembly=Microsoft.Maui.Essentials"
+             x:Class="AppEventosFutbol.Views.AgregarEstadioPage"
+             Title="Registrar Nuevo Estadio"
+             BackgroundColor="{StaticResource DarkBg}">
+
+    <Grid RowDefinitions="*, Auto">
+
+        <maps:Map x:Name="mapaEstadio" Grid.Row="0" MapClicked="OnMapClicked"/>
+
+        <!-- Bottom sheet premium dark -->
+        <Border Grid.Row="1" BackgroundColor="{StaticResource CardBg}" 
+                Stroke="{StaticResource BorderSubtle}" StrokeThickness="1"
+                Margin="0,-24,0,0" Padding="24,28,24,34">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="28,28,0,0"/>
+            </Border.StrokeShape>
+            <Border.Shadow>
+                <Shadow Brush="#50000000" Offset="0,-8" Radius="24" Opacity="0.9"/>
+            </Border.Shadow>
+
+            <VerticalStackLayout Spacing="18">
+
+                <!-- Drag handle -->
+                <BoxView WidthRequest="44" HeightRequest="5" Color="{StaticResource BorderMedium}" 
+                         CornerRadius="3" HorizontalOptions="Center" Margin="0,0,0,4"/>
+
+                <!-- Título con icono -->
+                <HorizontalStackLayout Spacing="10">
+                    <Border BackgroundColor="{StaticResource MexGreenSubtle}" StrokeThickness="0" 
+                            WidthRequest="36" HeightRequest="36" Padding="0">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="10"/></Border.StrokeShape>
+                        <Label Text="📍" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Border>
+                    <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                        <Label Text="Ubicación Seleccionada" TextColor="{StaticResource TextPrimary}" 
+                               FontAttributes="Bold" FontSize="17"/>
+                        <Label x:Name="lblCoordenadas" Text="Toca el mapa para colocar el Pin" 
+                               TextColor="{StaticResource MexGreen}" FontSize="12"/>
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+
+                <BoxView HeightRequest="1" Color="{StaticResource DividerColor}"/>
+
+                <HorizontalStackLayout Spacing="8">
+                    <BoxView WidthRequest="4" HeightRequest="20" Color="{StaticResource MexGreen}" CornerRadius="2" VerticalOptions="Center"/>
+                    <Label Text="NOMBRE DEL ESTADIO" Style="{StaticResource SectionLabel}"/>
+                </HorizontalStackLayout>
+
+                <Border BackgroundColor="{StaticResource InputBg}" 
+                        Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
+                    <Entry x:Name="txtNombreEstadio" Placeholder="Ej. Estadio Jalisco" 
+                           PlaceholderColor="{StaticResource TextMuted}" 
+                           TextColor="{StaticResource TextPrimary}" 
+                           FontSize="14" Margin="14,0" VerticalOptions="Center"/>
+                </Border>
+
+                <Grid ColumnDefinitions="*, *" ColumnSpacing="12" Margin="0,6,0,0">
+                    <!-- Botón guardar con gradiente a la izquierda -->
+                    <Border Grid.Column="0" StrokeThickness="0" Padding="0" HeightRequest="56">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="16"/></Border.StrokeShape>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#00A86B" Offset="0.0"/>
+                                <GradientStop Color="#006847" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Button Text="Guardar" BackgroundColor="Transparent"
+                                TextColor="White" FontAttributes="Bold" FontSize="15" 
+                                Clicked="OnGuardarClicked"/>
+                    </Border>
+                    <!-- Botón cancelar a la derecha -->
+                    <Button Grid.Column="1" Text="Cancelar" Style="{StaticResource SecondaryButton}" Clicked="OnCancelarClicked"/>
+                </Grid>
+
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

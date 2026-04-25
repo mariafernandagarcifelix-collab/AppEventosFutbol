@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AppEventosFutbol.Views.RegistroEventoPage"
+             Title="RegistroEventoPage"
+             BackgroundColor="{StaticResource DarkBg}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- HERO BANNER — Gradiente nocturno premium    -->
+            <!-- ═══════════════════════════════════════════ -->
+            <Grid HeightRequest="240">
+                <!-- Gradiente principal -->
+                <BoxView>
+                    <BoxView.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#006847" Offset="0.0"/>
+                            <GradientStop Color="#004030" Offset="0.35"/>
+                            <GradientStop Color="#0D1117" Offset="1.0"/>
+                        </LinearGradientBrush>
+                    </BoxView.Background>
+                </BoxView>
+
+                <!-- Línea decorativa diagonal sutil -->
+                <BoxView Opacity="0.06" WidthRequest="500" HeightRequest="500" 
+                         Rotation="35" TranslationX="100" TranslationY="-150">
+                    <BoxView.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="White" Offset="0.0"/>
+                            <GradientStop Color="Transparent" Offset="0.3"/>
+                        </LinearGradientBrush>
+                    </BoxView.Background>
+                </BoxView>
+
+                <!-- Contenido sobre el gradiente -->
+                <VerticalStackLayout VerticalOptions="End" Padding="24,0,24,28" Spacing="6">
+                    <!-- Badge decorativo -->
+                    <Border BackgroundColor="#22FFFFFF" StrokeThickness="0" Padding="10,5" 
+                            HorizontalOptions="Start" Margin="0,0,0,4">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                        <Label Text="⚽  NUEVO EVENTO" TextColor="#BBFFFFFF" 
+                               FontSize="11" FontAttributes="Bold" CharacterSpacing="2"/>
+                    </Border>
+                    <Label Text="Registro de Partidos" TextColor="White" 
+                           FontSize="28" FontAttributes="Bold" CharacterSpacing="-0.3"/>
+                    <Label Text="Crea tu próximo evento deportivo" TextColor="#77FFFFFF" 
+                           FontSize="13"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <VerticalStackLayout Padding="20,24,20,34" Spacing="20">
+
+                <!-- ═══════════════════════════════════════════ -->
+                <!-- CARD: Formulario de registro                -->
+                <!-- ═══════════════════════════════════════════ -->
+                <Border BackgroundColor="{StaticResource CardBg}" 
+                        Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" 
+                        Padding="22">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="20"/></Border.StrokeShape>
+                    <Border.Shadow><Shadow Brush="#30000000" Offset="0,8" Radius="24" Opacity="0.9"/></Border.Shadow>
+                    <VerticalStackLayout Spacing="18">
+
+                        <!-- Sección: ENCUENTRO -->
+                        <HorizontalStackLayout Spacing="8">
+                            <BoxView WidthRequest="4" HeightRequest="20" Color="{StaticResource MexGreen}" CornerRadius="2" VerticalOptions="Center"/>
+                            <Label Text="ENCUENTRO" Style="{StaticResource SectionLabel}"/>
+                        </HorizontalStackLayout>
+
+                        <!-- Equipos: Local VS Visitante -->
+                        <Grid ColumnDefinitions="*, Auto, *" ColumnSpacing="10">
+                            <Border Grid.Column="0" BackgroundColor="{StaticResource InputBg}" 
+                                    Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
+                                <Entry x:Name="txtEquipoLocal" Placeholder="Equipo Local" 
+                                       PlaceholderColor="{StaticResource TextMuted}" 
+                                       TextColor="{StaticResource TextPrimary}" FontSize="14" 
+                                       Margin="14,0" VerticalOptions="Center"/>
+                            </Border>
+
+                            <!-- VS badge con gradiente -->
+                            <Border Grid.Column="1" StrokeThickness="0" 
+                                    WidthRequest="40" HeightRequest="40">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="20"/></Border.StrokeShape>
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#00A86B" Offset="0.0"/>
+                                        <GradientStop Color="#006847" Offset="1.0"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Label Text="VS" TextColor="White" FontAttributes="Bold" 
+                                       FontSize="12" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+
+                            <Border Grid.Column="2" BackgroundColor="{StaticResource InputBg}" 
+                                    Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
+                                <Entry x:Name="txtEquipoVisitante" Placeholder="Visitante" 
+                                       PlaceholderColor="{StaticResource TextMuted}" 
+                                       TextColor="{StaticResource TextPrimary}" FontSize="14" 
+                                       Margin="14,0" VerticalOptions="Center"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Boletos + Precio -->
+                        <Grid ColumnDefinitions="*, *" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="8">
+                                <Label Text="BOLETOS DISPONIBLES" Style="{StaticResource SectionLabel}"/>
+                                <Border BackgroundColor="{StaticResource InputBg}" 
+                                        Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
+                                    <Entry x:Name="txtBoletos" Placeholder="Ej. 5000" 
+                                           PlaceholderColor="{StaticResource TextMuted}" 
+                                           Keyboard="Numeric" TextColor="{StaticResource TextPrimary}" 
+                                           FontSize="14" Margin="14,0" VerticalOptions="Center"/>
+                                </Border>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="8">
+                                <Label Text="PRECIO (MXN)" Style="{StaticResource SectionLabel}"/>
+                                <Border BackgroundColor="{StaticResource InputBg}" 
+                                        Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
+                                    <Entry x:Name="txtPrecio" Placeholder="$ 1,500" 
+                                           PlaceholderColor="{StaticResource TextMuted}" 
+                                           Keyboard="Numeric" TextColor="{StaticResource TextPrimary}" 
+                                           FontSize="14" Margin="14,0" VerticalOptions="Center"/>
+                                </Border>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <!-- Fecha + Hora -->
+                        <Grid ColumnDefinitions="*, *" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="8">
+                                <Label Text="📅  FECHA" Style="{StaticResource SectionLabel}"/>
+                                <Border BackgroundColor="{StaticResource InputBg}" 
+                                        Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
+                                    <DatePicker x:Name="dpFecha" TextColor="{StaticResource TextPrimary}" 
+                                                Margin="14,0" VerticalOptions="Center"/>
+                                </Border>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="8">
+                                <Label Text="⏰  HORA" Style="{StaticResource SectionLabel}"/>
+                                <Border BackgroundColor="{StaticResource InputBg}" 
+                                        Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
+                                    <TimePicker x:Name="tpHora" TextColor="{StaticResource TextPrimary}" 
+                                                Margin="14,0" VerticalOptions="Center"/>
+                                </Border>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <BoxView Style="{StaticResource Divider}"/>
+
+                        <!-- Sección: ESTADIO -->
+                        <HorizontalStackLayout Spacing="8">
+                            <BoxView WidthRequest="4" HeightRequest="20" Color="{StaticResource MexRed}" CornerRadius="2" VerticalOptions="Center"/>
+                            <Label Text="ESTADIO ANFITRIÓN" Style="{StaticResource SectionLabel}"/>
+                        </HorizontalStackLayout>
+
+                        <Border BackgroundColor="{StaticResource InputBg}" 
+                                Stroke="{StaticResource BorderSubtle}" StrokeThickness="1" HeightRequest="52">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="14"/></Border.StrokeShape>
+                            <Picker x:Name="pickerEstadio" Title="Selecciona un estadio..." 
+                                    TextColor="{StaticResource TextPrimary}" 
+                                    TitleColor="{StaticResource TextMuted}" 
+                                    Margin="14,0" SelectedIndexChanged="OnEstadioSeleccionado"/>
+                        </Border>
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- BOTÓN con gradiente visual -->
+                <Border StrokeThickness="0" Padding="0" HeightRequest="58">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="16"/></Border.StrokeShape>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#00A86B" Offset="0.0"/>
+                            <GradientStop Color="#006847" Offset="1.0"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Button Text="⚽  Crear Evento" 
+                            BackgroundColor="Transparent"
+                            TextColor="White" FontAttributes="Bold" FontSize="16" 
+                            CharacterSpacing="0.8"
+                            Clicked="OnGuardarClicked"/>
+                </Border>
+
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
