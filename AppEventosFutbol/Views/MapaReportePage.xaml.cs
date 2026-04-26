@@ -14,7 +14,7 @@ public partial class MapaReportePage : ContentPage
     // NUEVO: Diccionario para enlazar cada Pin visual con sus datos (Evento)
     private Dictionary<Pin, Evento> _diccionarioPines;
     private Evento _eventoSeleccionado;
-    private bool _esperandoOrigen = false;
+    private List<Estadio> _estadiosCargados = new List<Estadio>();
 
     public MapaReportePage()
 	{
@@ -44,6 +44,10 @@ public partial class MapaReportePage : ContentPage
 
             // 2. MAGIA: Usamos 'await' para traer los datos reales de Supabase
             _eventosProximos = await _controller.ObtenerEventosProximosMapaAsync();
+
+            try {
+                _estadiosCargados = await new RegistroEventoController().ObtenerEstadiosAsync();
+            } catch { }
 
             // Verificamos que la lista no venga vacía o nula
             if (_eventosProximos != null && _eventosProximos.Count > 0)
@@ -123,7 +127,7 @@ public partial class MapaReportePage : ContentPage
         // Llenamos nuestra tarjeta personalizada con los datos que recuperamos
         lblSede.Text = $"🏟️ {eventoSeleccionado.EstadioNombre}";
         lblEquipos.Text = $"{eventoSeleccionado.EquipoLocal} vs {eventoSeleccionado.EquipoVisitante}";
-        lblFecha.Text = eventoSeleccionado.FechaHora.ToString("dd MMMM, HH:mm hrs");
+        lblFecha.Text = eventoSeleccionado.FechaHora.ToString("dd MMMM, HH:mm 'hrs'");
         lblBoletos.Text = (eventoSeleccionado.BoletosTotales - eventoSeleccionado.NumeroBoletos).ToString("N0");
         lblPrecio.Text = $"${eventoSeleccionado.Precio:N2}";
 
@@ -149,29 +153,15 @@ public partial class MapaReportePage : ContentPage
             await tarjetaEvento.FadeTo(0, 200);
             tarjetaEvento.IsVisible = false;
             
-            _esperandoOrigen = true;
-            bannerInstruccion.IsVisible = true;
+            searchContainer.IsVisible = true;
+            searchBarUbicacion.Text = "";
+            searchBarUbicacion.Focus();
         }
     }
 
-    private async void OnMapClicked(object sender, MapClickedEventArgs e)
+    private void OnMapClicked(object sender, MapClickedEventArgs e)
     {
-        if (_esperandoOrigen && _eventoSeleccionado != null)
-        {
-            _esperandoOrigen = false;
-            bannerInstruccion.IsVisible = false;
-
-            // Mostrar animación de carga
-            gridCargando.IsVisible = true;
-
-            // Trazar ruta nativa usando OSRM
-            Location origen = e.Location;
-            Location destino = new Location(_eventoSeleccionado.Latitud, _eventoSeleccionado.Longitud);
-            await TrazarRutaNativaAsync(origen, destino);
-
-            // Ocultar animación de carga
-            gridCargando.IsVisible = false;
-        }
+        // Ya no usamos el toque en el mapa para marcar origen, usamos el buscador
     }
 
     private async Task TrazarRutaNativaAsync(Location origen, Location destino)
@@ -310,36 +300,83 @@ public partial class MapaReportePage : ContentPage
         string query = searchBarUbicacion.Text;
         if (string.IsNullOrWhiteSpace(query)) return;
 
-        gridCargando.IsVisible = true;
-        try
-        {
-            var locations = await Geocoding.Default.GetLocationsAsync(query);
-            var location = locations?.FirstOrDefault();
+        borderSugerencias.IsVisible = false;
 
-            if (location != null)
+        if (_eventoSeleccionado != null)
+        {
+            searchContainer.IsVisible = false;
+            gridCargando.IsVisible = true;
+
+            try
             {
-                // Agregar pin temporal de busqueda
-                var pinBusqueda = new Pin 
-                { 
-                    Label = query, 
-                    Type = PinType.SearchResult, 
-                    Location = location 
-                };
-                mapaReportes.Pins.Add(pinBusqueda);
-                mapaReportes.MoveToRegion(MapSpan.FromCenterAndRadius(location, Distance.FromKilometers(2)));
+                var locations = await Geocoding.Default.GetLocationsAsync(query);
+                var location = locations?.FirstOrDefault();
+
+                if (location != null)
+                {
+                    Location origen = location;
+                    Location destino = new Location(_eventoSeleccionado.Latitud, _eventoSeleccionado.Longitud);
+                    await TrazarRutaNativaAsync(origen, destino);
+                }
+                else
+                {
+                    await DisplayAlert("Sin resultados", "No se encontró la ubicación ingresada.", "OK");
+                    searchContainer.IsVisible = true;
+                }
             }
-            else
+            catch (Exception)
             {
-                await DisplayAlert("Sin resultados", "No se encontró la ubicación ingresada.", "OK");
+                await DisplayAlert("Error", "Problema al buscar la ubicación. Verifica tu conexión a internet.", "OK");
+                searchContainer.IsVisible = true;
+            }
+            finally
+            {
+                gridCargando.IsVisible = false;
             }
         }
-        catch (Exception)
+    }
+
+    private void OnSearchBarTextChanged(object sender, TextChangedEventArgs e)
+    {
+        string query = e.NewTextValue?.ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(query))
         {
-            await DisplayAlert("Error", "Problema al buscar la ubicación. Verifica tu conexión a internet.", "OK");
+            borderSugerencias.IsVisible = false;
+            return;
         }
-        finally
+
+        var sugerencias = _estadiosCargados.Where(x => x.Nombre.ToLowerInvariant().Contains(query)).ToList();
+        
+        if (sugerencias.Any())
         {
-            gridCargando.IsVisible = false;
+            cvSugerencias.ItemsSource = sugerencias;
+            borderSugerencias.IsVisible = true;
+        }
+        else
+        {
+            borderSugerencias.IsVisible = false;
+        }
+    }
+
+    private async void OnSugerenciaSeleccionada(object sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.FirstOrDefault() is Estadio estadioSeleccionado)
+        {
+            searchBarUbicacion.Text = estadioSeleccionado.Nombre;
+            borderSugerencias.IsVisible = false;
+            cvSugerencias.SelectedItem = null;
+            
+            if (_eventoSeleccionado != null)
+            {
+                searchContainer.IsVisible = false;
+                gridCargando.IsVisible = true;
+
+                Location origen = new Location(estadioSeleccionado.Latitud, estadioSeleccionado.Longitud);
+                Location destino = new Location(_eventoSeleccionado.Latitud, _eventoSeleccionado.Longitud);
+                await TrazarRutaNativaAsync(origen, destino);
+
+                gridCargando.IsVisible = false;
+            }
         }
     }
 }

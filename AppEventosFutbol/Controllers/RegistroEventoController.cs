@@ -102,7 +102,7 @@ namespace AppEventosFutbol.Controllers
                 // Insertamos en la nube
                 await SupabaseConfig.Cliente.From<Evento>().Insert(nuevoEvento);
 
-                return (true, "Evento registrado correctamente en la base de datos.");
+                return (true, "Evento registrado correctamente.");
             }
             catch (Exception ex)
             {

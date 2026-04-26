@@ -7,6 +7,8 @@ public partial class AgregarEquipoPage : ContentPage
 {
     private AgregarEquipoController _controller;
 
+    public string NombreNuevoEquipo { get; private set; }
+
     public AgregarEquipoPage()
     {
         InitializeComponent();
@@ -20,6 +22,7 @@ public partial class AgregarEquipoPage : ContentPage
         if (resultado.Exito)
         {
             await DisplayAlert("Éxito", resultado.Mensaje, "OK");
+            NombreNuevoEquipo = txtNombreEquipo.Text;
             await Navigation.PopModalAsync();
         }
         else

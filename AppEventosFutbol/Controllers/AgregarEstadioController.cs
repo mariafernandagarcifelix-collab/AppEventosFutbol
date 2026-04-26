@@ -29,7 +29,7 @@ namespace AppEventosFutbol.Controllers
                 // 2. MAGIA: Insertamos en Supabase
                 await SupabaseConfig.Cliente.From<Estadio>().Insert(nuevoEstadio);
 
-                return (true, "Estadio guardado con éxito en la nube.");
+                return (true, "Estadio guardado con éxito.");
             }
             catch (Exception ex)
             {

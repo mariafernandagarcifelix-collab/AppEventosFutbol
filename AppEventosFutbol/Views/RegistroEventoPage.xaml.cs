@@ -57,7 +57,14 @@ public partial class RegistroEventoPage : ContentPage
             pickerEstadio.SelectedIndex = -1;
             // Abrimos el mapa de agregar estadio y recargamos al cerrar
             var modalPage = new AgregarEstadioPage();
-            modalPage.Disappearing += async (s, args) => await CargarEstadiosAsync();
+            modalPage.Disappearing += async (s, args) => 
+            {
+                await CargarEstadiosAsync();
+                if (!string.IsNullOrEmpty(modalPage.NombreNuevoEstadio))
+                {
+                    pickerEstadio.SelectedItem = modalPage.NombreNuevoEstadio;
+                }
+            };
             await Navigation.PushModalAsync(modalPage);
         }
     }
@@ -120,7 +127,14 @@ public partial class RegistroEventoPage : ContentPage
         {
             pickerEquipoLocal.SelectedIndex = -1;
             var modalPage = new AgregarEquipoPage();
-            modalPage.Disappearing += async (s, args) => await CargarEquiposAsync();
+            modalPage.Disappearing += async (s, args) => 
+            {
+                await CargarEquiposAsync();
+                if (!string.IsNullOrEmpty(modalPage.NombreNuevoEquipo))
+                {
+                    pickerEquipoLocal.SelectedItem = modalPage.NombreNuevoEquipo;
+                }
+            };
             await Navigation.PushModalAsync(modalPage);
         }
         else
@@ -140,7 +154,14 @@ public partial class RegistroEventoPage : ContentPage
         {
             pickerEquipoVisitante.SelectedIndex = -1;
             var modalPage = new AgregarEquipoPage();
-            modalPage.Disappearing += async (s, args) => await CargarEquiposAsync();
+            modalPage.Disappearing += async (s, args) => 
+            {
+                await CargarEquiposAsync();
+                if (!string.IsNullOrEmpty(modalPage.NombreNuevoEquipo))
+                {
+                    pickerEquipoVisitante.SelectedItem = modalPage.NombreNuevoEquipo;
+                }
+            };
             await Navigation.PushModalAsync(modalPage);
         }
         else

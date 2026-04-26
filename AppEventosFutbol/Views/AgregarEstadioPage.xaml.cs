@@ -1,6 +1,8 @@
 using AppEventosFutbol.Controllers;
+using AppEventosFutbol.Models;
 using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Maps;
+using System.Text.Json;
 
 namespace AppEventosFutbol.Views;
 
@@ -9,11 +11,24 @@ public partial class AgregarEstadioPage : ContentPage
     private AgregarEstadioController _controller;
     private double? _latitudSeleccionada;
     private double? _longitudSeleccionada;
+    public string NombreNuevoEstadio { get; private set; }
+
+    private HttpClient _httpClient;
+    private CancellationTokenSource _cts;
+
+    public class LugarSugerencia
+    {
+        public string Nombre { get; set; }
+        public double Latitud { get; set; }
+        public double Longitud { get; set; }
+    }
 
     public AgregarEstadioPage()
 	{
 		InitializeComponent();
         _controller = new AgregarEstadioController();
+        _httpClient = new HttpClient();
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", "AppEventosFutbol/1.0");
 
         // Mover la cámara a México por defecto al abrir
         Location ubicacionMexico = new Location(23.6345, -102.5528);
@@ -31,8 +46,8 @@ public partial class AgregarEstadioPage : ContentPage
     {
         try
         {
-            var estadios = await new RegistroEventoController().ObtenerEstadiosAsync();
-            foreach (var estadio in estadios)
+            var estadiosCargados = await new RegistroEventoController().ObtenerEstadiosAsync();
+            foreach (var estadio in estadiosCargados)
             {
                 var pin = new Pin
                 {
@@ -86,6 +101,8 @@ public partial class AgregarEstadioPage : ContentPage
         else
         {
             await DisplayAlert("Éxito", resultado.Mensaje, "OK");
+            
+            NombreNuevoEstadio = txtNombreEstadio.Text;
 
             // Regresamos a la pantalla anterior (Registro de Eventos)
             await Navigation.PopModalAsync();
@@ -128,6 +145,80 @@ public partial class AgregarEstadioPage : ContentPage
         finally
         {
             gridCargando.IsVisible = false;
+        }
+    }
+
+    private async void OnSearchBarTextChanged(object sender, TextChangedEventArgs e)
+    {
+        string query = e.NewTextValue?.Trim();
+        if (string.IsNullOrWhiteSpace(query) || query.Length < 3)
+        {
+            borderSugerencias.IsVisible = false;
+            return;
+        }
+
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
+        try
+        {
+            await Task.Delay(500, token); // Debounce de 500ms
+
+            string url = $"https://nominatim.openstreetmap.org/search?format=json&q={Uri.EscapeDataString(query)}&countrycodes=mx&limit=5";
+
+            var response = await _httpClient.GetStringAsync(url, token);
+            
+            using var doc = JsonDocument.Parse(response);
+            var root = doc.RootElement;
+            
+            var sugerencias = new List<LugarSugerencia>();
+            
+            foreach (var item in root.EnumerateArray())
+            {
+                sugerencias.Add(new LugarSugerencia
+                {
+                    Nombre = item.GetProperty("display_name").GetString(),
+                    Latitud = double.Parse(item.GetProperty("lat").GetString(), System.Globalization.CultureInfo.InvariantCulture),
+                    Longitud = double.Parse(item.GetProperty("lon").GetString(), System.Globalization.CultureInfo.InvariantCulture)
+                });
+            }
+
+            if (sugerencias.Any())
+            {
+                cvSugerencias.ItemsSource = sugerencias;
+                borderSugerencias.IsVisible = true;
+            }
+            else
+            {
+                borderSugerencias.IsVisible = false;
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // Ignorado, el usuario siguió escribiendo
+        }
+        catch
+        {
+            // Error de red
+        }
+    }
+
+    private void OnSugerenciaSeleccionada(object sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.FirstOrDefault() is LugarSugerencia sugerencia)
+        {
+            var shortName = sugerencia.Nombre.Split(',')[0];
+            searchBarUbicacion.Text = shortName;
+            borderSugerencias.IsVisible = false;
+            cvSugerencias.SelectedItem = null;
+            
+            // Centrar mapa
+            var loc = new Location(sugerencia.Latitud, sugerencia.Longitud);
+            mapaEstadio.MoveToRegion(MapSpan.FromCenterAndRadius(loc, Distance.FromKilometers(2)));
+
+            // Poner el pin automáticamente
+            OnMapClicked(this, new MapClickedEventArgs(loc));
         }
     }
 }
